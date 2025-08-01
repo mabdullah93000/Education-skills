@@ -1,0 +1,210 @@
+<!-- File: quiz.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz Selection</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .container {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    button, input[type="submit"] {
+      background-color: #00bfff;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    input[type="text"], input[type="password"] {
+      padding: 10px;
+      width: 80%;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: none;
+    }
+    h2 {
+      color: #00bfff;
+    }
+    #lock-msg {
+      color: red;
+      font-weight: bold;
+    }
+    #customAlert {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 5px;
+      background-color: #ff4c4c;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="quizSelection">
+      <h2>Select a Quiz</h2>
+      <button onclick="startLogin('english')">English Grammar</button>
+      <button onclick="startLogin('islamiat')">Islamyat</button>
+      <button onclick="startLogin('pakistan')">Pakistan Affairs</button>
+      <button onclick="startLogin('current')">Current Affairs</button>
+    </div>
+
+    <div id="loginSection" class="hidden">
+      <h2>Login</h2>
+      <input type="text" id="username" placeholder="Username"><br>
+      <input type="password" id="password" placeholder="Password"><br>
+      <button onclick="verifyLogin()">Login</button>
+      <div id="customAlert" class="hidden">🚫 Invalid username or password!</div>
+    </div>
+
+    <div id="nameSection" class="hidden">
+      <h2>Enter Your Name</h2>
+      <input type="text" id="firstName" placeholder="First Name"><br>
+      <input type="text" id="lastName" placeholder="Last Name"><br>
+      <button onclick="showQuiz()">Proceed</button>
+    </div>
+
+    <p id="lock-msg" class="hidden">🚫 You have already attempted this version of the quiz.</p>
+
+    <form id="quizForm" class="hidden" action="https://formspree.io/f/mzzvvqdw" method="POST">
+      <h2 id="quizTitle"></h2>
+      <input type="hidden" name="firstName" id="hiddenFirstName">
+      <input type="hidden" name="lastName" id="hiddenLastName">
+      <input type="hidden" name="quizTopic" id="hiddenQuizTopic">
+      <div id="quizContent"></div>
+      <input type="submit" value="Submit Quiz">
+    </form>
+  </div>
+
+  <script>
+    const quizVersion = {
+      english: 2,
+      islamiat: 1,
+      pakistan: 1,
+      current: 1
+    };
+
+    let selectedQuiz = "";
+
+    function startLogin(quiz) {
+      selectedQuiz = quiz;
+      const versionKey = `${quiz}-version`;
+      const attemptedVersion = localStorage.getItem(versionKey);
+
+      if (attemptedVersion == quizVersion[quiz].toString()) {
+        document.getElementById('quizSelection').classList.add('hidden');
+        document.getElementById('lock-msg').classList.remove('hidden');
+        return;
+      }
+
+      document.getElementById('quizSelection').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+    }
+
+    function verifyLogin() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const alertBox = document.getElementById('customAlert');
+
+      if (username === 'admin' && password === '93000') {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('nameSection').classList.remove('hidden');
+      } else {
+        alertBox.classList.remove('hidden');
+        setTimeout(() => {
+          alertBox.classList.add('hidden');
+        }, 3000);
+      }
+    }
+
+    function showQuiz() {
+      const fname = document.getElementById('firstName').value;
+      const lname = document.getElementById('lastName').value;
+      if (!fname || !lname) {
+        alert('Please enter both first and last name.');
+        return;
+      }
+
+      document.getElementById('nameSection').classList.add('hidden');
+      document.getElementById('quizForm').classList.remove('hidden');
+      document.getElementById('quizTitle').innerText = selectedQuiz.replace(/\b\w/g, l => l.toUpperCase()) + ' Quiz';
+      document.getElementById('hiddenFirstName').value = fname;
+      document.getElementById('hiddenLastName').value = lname;
+      document.getElementById('hiddenQuizTopic').value = selectedQuiz;
+      renderQuiz(selectedQuiz);
+    }
+
+    function renderQuiz(topic) {
+      const quizContent = {
+        english: `
+          <p>Q1: Choose the correct sentence:</p>
+          <label><input type="radio" name="q1" value="a"> He go to school.</label><br>
+          <label><input type="radio" name="q1" value="b"> He goes to school.</label><br>
+
+          <p>Q2: What is the plural of 'mouse'?</p>
+          <label><input type="radio" name="q2" value="a"> Mouses</label><br>
+          <label><input type="radio" name="q2" value="b"> Mice</label><br>
+        `,
+        islamiat: `
+          <p>Q1: How many prayers are in a day?</p>
+          <label><input type="checkbox" name="q1" value="a"> Three</label><br>
+          <label><input type="checkbox" name="q1" value="b"> Five</label><br>
+          <label><input type="checkbox" name="q1" value="c"> Four</label><br>
+
+          <p>Q2: What is the name of the last Prophet?</p>
+          <label><input type="radio" name="q2" value="a"> Isa (AS)</label><br>
+          <label><input type="radio" name="q2" value="b"> Muhammad (PBUH)</label><br>
+        `,
+        pakistan: `
+          <p>Q1: When did Pakistan come into being?</p>
+          <label><input type="checkbox" name="q1" value="a"> 1947</label><br>
+          <label><input type="checkbox" name="q1" value="b"> 1950</label><br>
+
+          <p>Q2: What is the capital of Pakistan?</p>
+          <label><input type="radio" name="q2" value="a"> Lahore</label><br>
+          <label><input type="radio" name="q2" value="b"> Islamabad</label><br>
+        `,
+        current: `
+          <p>Q1: Who is the current Secretary-General of the UN?</p>
+          <label><input type="radio" name="q1" value="a"> António Guterres</label><br>
+          <label><input type="radio" name="q1" value="b"> Ban Ki-moon</label><br>
+
+          <p>Q2: Which country recently hosted the G20 summit?</p>
+          <label><input type="radio" name="q2" value="a"> India</label><br>
+          <label><input type="radio" name="q2" value="b"> USA</label><br>
+        `
+      };
+      document.getElementById('quizContent').innerHTML = quizContent[topic];
+    }
+
+    document.getElementById('quizForm').addEventListener('submit', function (e) {
+      const versionKey = `${selectedQuiz}-version`;
+      localStorage.setItem(versionKey, quizVersion[selectedQuiz].toString());
+    });
+  </script>
+</body>
+</html>
